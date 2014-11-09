@@ -2,6 +2,8 @@
 
 <html>
 
+
+
 	<head>
 		<title>BOOTSTRAP</title>
 		<link rel="stylesheet" href="css/main.css">

@@ -3,6 +3,8 @@ include 'connect.php';
 include 'sessions.php';
 
 
+
+
 echo $uname = $_POST['username'];
 echo $upass = $_POST['password'];
 echo '<hr>';
