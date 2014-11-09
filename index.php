@@ -41,142 +41,65 @@
 			
 
 
-			$sponsorposition = $
 			// chi edit
-			$layer = $_POST['layer'];	
-			$layerposition = $_POST['layerposition'];
-
+				$layer = $_POST['layer'];	
+				$layerposition = $_POST['layerposition'];
 			// end of edit
 
 
+			// INSERT TO USERS
+				$insert  = $db->query("INSERT INTO `Users`(`userId`, `sponsorId`, `parentId`, `position`, `layer`, `layerPosition`, `userName`, `password`, `fName`, `mName`, `lName`, `contactNum`, `email`, `address`, `gender`, `dateOfBirth`, `cStatus`, `type`, `status`, `activationCode`, `dateAdded`, `dateActivated`) 
+									  VALUES ('','".$sponsor."','".$parent."','".$position."','".$layer."','".$layerposition."','".$username."','".$password."','".$fname."','".$mname."','".$lname."','".$contactnum."','".$email."','".$address."','".$gender."','".$dateofbirth."','".$cstatus."','1','active','12346790',now(),'')");
+			// END INSERT TO USERS
 
-
-
-			$insert  = $db->query("INSERT INTO `Users`(`userId`, `sponsorId`, `parentId`, `position`, `layer`, `layerPosition`, `userName`, `password`, `fName`, `mName`, `lName`, `contactNum`, `email`, `address`, `gender`, `dateOfBirth`, `cStatus`, `type`, `status`, `activationCode`, `dateAdded`, `dateActivated`) 
-
-				VALUES ('','".$sponsor."','".$parent."','".$position."','".$layer."','".$layerposition."','".$username."','".$password."','".$fname."','".$mname."','".$lname."','".$contactnum."','".$email."','".$address."','".$gender."','".$dateofbirth."','".$cstatus."','1','active','12346790',now(),'')");
-
-
-
+			// NEWLY GENERATED USER ID
 			$ref = $db->insert_id;	
 
+	
+			// DIRECT REFERRALS
 
-			$quetop = $db->query("SELECT sponsorId FROM Users WHERE userId = '".$sponsor."'");
-			$ftop = $quetop->fetch_array();
-			$top = $ftop[0];		
-
-			$quedirectref = $db->query("SELECT COUNT(refId) FROM Referrals WHERE mainSponsor = '".$sponsor."' and type = 'direct'");
-			$directcount = $quedirectref->fetch_array();
-			$dcnt = $directcount[0] + 1;
-
-
-			// INSERT DIRECT REFERRALS
-			$insertdirectRef = $db->query("INSERT INTO `Referrals`(`refId`, `mainSponsor`, `subSponsor`, `amount`, `count`, `status`,`type`, `referralDate`, `encashedDate`) 
-									 VALUES ('','".$sponsor."','".$ref."','400','".$dcnt."','pending','direct',now(),'')");
+						// COUNT DIRECT REF COUNT
+							$quedirectref = $db->query("SELECT COUNT(refId) FROM Referrals WHERE mainSponsor = '".$sponsor."'");
+							$directcount = $quedirectref->fetch_array();
+							$dcnt = $directcount[0] + 1;
+						// END DIRECT REF COUNT
 
 
-			// INSERT INDIRECT REFERRALS
-			// for($i = 1;$i <= 20 ;$i++){						
+						// INSERT DIRECT REFERRALS
+							$insertdirectRef = $db->query("INSERT INTO `Referrals`(`refId`, `mainSponsor`, `subSponsor`, `amount`, `count`, `status`,`type`, `referralDate`, `encashedDate`) 
+													 VALUES ('','".$sponsor."','".$ref."','400','".$dcnt."','pending','direct',now(),'')");
 
-			// 			$topin = $db->query("SELECT parentId,userId FROM Users WHERE userId = '".$parent."' AND parentId IS NOT NULL");
-			// 			$intop = $topin->fetch_array();
-			// 			echo "parent:". $in = $intop[0];
-						
-			// 			 echo "user:".$intop[1]."<br/>";
- 	
-			// 			 if($intop2[0] != 0){
-
-			// 				 $insertindirectRef = $db->query("INSERT INTO `Referrals`(`refId`, `mainSponsor`, `subSponsor`, `amount`, `count`, `status`,`type`, `referralDate`, `encashedDate`) 
-			// 				 		 						 VALUES ('','".$intop[1]."','','10','','pending','indirect',now(),'')");
-
-			// 			 }
-						 
-			// 			 $parent = $in;
-
-			// }
+			// END DIRECT REFERRALS	
 
 
 
-			// INSERT PAIRING BONUS
-			//commented by chi
-			//$quepair = $db->query("SELECT COUNT(pairId) FROM Pairs WHERE sponsorId = '" . $parent . "'");
-			//end of comment
-			$quepair = $db->query("SELECT COUNT(pairId) FROM Pairs WHERE sponsorId = '" . $sponsor . "'");
-			
-			$paircount = $quepair->fetch_array();
-			$pcnt = $paircount[0] + 1;
+			// INSERT INDIRECT REFERRALS	
 
-			if($position == 'L'){
+							
+							$i = 1;
+							do{					
 
-				//conment by chi
-				//$check = $db->query("SELECT userId FROM users WHERE parentId = '".$parent."' AND position = 'R'");				
-				//end of comment
-				$check = $db->query("SELECT userId FROM users WHERE sponsorId = '".$sponsor."' AND position = 'R'");
+									$topin = $db->query("SELECT parentId,userId FROM Users WHERE userId = '".$parent."' AND parentId IS NOT NULL");
+									$intop = $topin->fetch_array();
+									$in = $intop[0];
+									
+									 if($in != 0){
+										 $insertindirectRef = $db->query("INSERT INTO `Referrals`(`refId`, `mainSponsor`, `subSponsor`, `amount`, `count`, `status`,`type`, `referralDate`, `encashedDate`) 
+										 		 						 VALUES ('',".$in.",'".$ref."','10','','pending','indirect',now(),'')");
+									 }		
 
-
-				if($affected = $db->affected_rows){
-					$rpos = $check->fetch_array();
-					$r = $rpos[0];				
-
-
-					$pair = $db->query("INSERT INTO `Pairs`(`pairId`, `sponsorId`, `left`, `right`, `datePaired`, `count`, `status`, `encashedDate`)
-										VALUES ('','".$parent."','".$ref."','".$r."',now(),'".$pcnt."','pending','')");
-
-					$refpair = $db->insert_id;
-
-
-					//INSERT 5TH PAIR
-					if($pcnt % 5){
-
-						$point = $db->query("INSERT INTO `points`(`pointId`, `sponsorId`, `pairId`, `count`, `dateAdded`, `status`, `encashedDate`) 
-											VALUES ('','".$parent."','".$parent."','".$refpair."',now(),'pending','')");
-
-					}
-
-
-
-				}
-				
-
-
-			}
-
-			else if($position == 'R'){
-
-				$check = $db->query("SELECT * FROM Users WHERE parentId = '".$parent."' AND position = 'L'");
-				if($affected = $db->affected_rows){
-
-					$lpos = $check->fetch_array();
-					$l = $lpos[0];
-
-					$pair = $db->query("INSERT INTO `Pairs`(`pairId`, `sponsorId`, `left`, `right`, `datePaired`, `count`, `status`, `encashedDate`)
-										VALUES ('','".$parent."','".$l."','".$ref."',now(),'','pending','')");
-
-					$refpair = $db->insert_id;	
-
-					
-					// INSERT 5TH PAIR
-					if($pcnt % 5){
-
-						$point = $db->query("INSERT INTO `points`(`pointId`, `sponsorId`, `pairId`, `count`, `dateAdded`, `status`, `encashedDate`) 
-											VALUES ('','".$parent."','".$parent."','".$refpair."',now(),'pending','')");
-
-					}
-
-					
-				}
-
-			}
+									 $parent = $in;
+									 $i++;	
+							} while($i<=20 && $in != 0);
+			// END INDIRECT REFERRALS	
 
 
 			if($insert){
-
 					echo "<script>alert('hey');</script>";
-
 			}
+		
+
 		}
-
-
 	?>
 	<body>	
 
