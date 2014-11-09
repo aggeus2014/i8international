@@ -2,8 +2,6 @@
 
 	include('connect.php');
 
-	
-
 
 
 

@@ -5,8 +5,6 @@
 	// error_reporting(0);
 
 	
-
-
 			// INSERT PAIRING BONUS				
 														
 								$startuser = '4';	
